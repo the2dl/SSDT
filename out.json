@@ -1,0 +1,20 @@
+[
+  {
+    "timestamp": "2024-03-02T12:17:50.854467",
+    "command": "whoami",
+    "output": "dan\n",
+    "group_id": "c7e26698-11dd-4e46-8bb8-705f25f463cf"
+  },
+  {
+    "timestamp": "2024-03-02T12:17:51.874665",
+    "command": "uname -a",
+    "output": "Darwin mac16.lan 23.3.0 Darwin Kernel Version 23.3.0: Wed Dec 20 21:30:59 PST 2023; root:xnu-10002.81.5~7/RELEASE_ARM64_T6030 arm64\n",
+    "group_id": "c7e26698-11dd-4e46-8bb8-705f25f463cf"
+  },
+  {
+    "timestamp": "2024-03-02T12:17:52.897050",
+    "command": "pwd",
+    "output": "/Users/dan/detection_testing\n",
+    "group_id": "c7e26698-11dd-4e46-8bb8-705f25f463cf"
+  }
+]

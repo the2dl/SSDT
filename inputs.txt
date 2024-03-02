@@ -1,0 +1,3 @@
+whoami
+uname -a
+pwd
