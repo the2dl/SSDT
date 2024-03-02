@@ -17,7 +17,7 @@
             </form>
         </div>
 
-        <p class="mt-3">Operating System: {{ operating_system }}</p>
+        <p class="mt-3">Add your commands and hit run!</p>
 
         {% if table_data %}
         <h2 class="mt-3">Output</h2>
@@ -30,6 +30,7 @@
                             <th>Timestamp (UTC)</th>
                             <th>Command</th>
                             <th>Output/Error</th>
+                            <th>OS</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -38,18 +39,17 @@
                             <td>{{ record.timestamp }}</td>
                             <td>{{ record.command }}</td>
                             <td>{{ record.output if record.output else record.error }}</td>
+                            <td>{{ record.operating_system }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+                <!-- Delete button for the specific group -->
+                <form action="/delete_output?group_id={{ group[0].group_id }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Delete This Group</button>
+                </form>
             </div>
         {% endfor %}
-        
-        <!-- "Delete Output" button shown only when table_data exists, placed below the table -->
-        <form method="POST" action="/delete_output" class="mt-3">
-            <button type="submit" class="btn btn-danger">Delete Output</button>
-        </form>
-        
         {% endif %}
     </div>
 </body>
