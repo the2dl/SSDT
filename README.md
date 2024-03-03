@@ -42,3 +42,4 @@ whoami
 ```
 ## Screenshots
 ![Main](/screenshot/main.png?raw=true "Main")
+![History](/screenshot/main.png?raw=true "History")
