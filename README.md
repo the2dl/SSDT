@@ -31,7 +31,7 @@ url = "SETYOURURL"
 key = "SETYOURKEY"
 
 ## Start Flask
-flask run from within the repository directory, connect to it on http://127.0.0.1:5000
+`flask run` from within the repository directory, connect to it on http://127.0.0.1:5000
 
 ## Run
 Within the app, you can add a list of commands you want to run, one per new line, for example
