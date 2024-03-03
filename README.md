@@ -6,6 +6,8 @@ This tool is an extremely basic implementation of running commands on endpoints 
 
 It also allows for historical views, and simple deletion capabilities to clear out your test queues.
 
+This tool is operating system agnostic. As long as you have python installed it will run. You could also pre-compile it as a binary per OS and run it without installing python with pyinstaller.
+
 ## Installation
 Signup for the free tier of Supabase at https://supabase.com/database
 
