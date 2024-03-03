@@ -11,3 +11,19 @@ th, td {
 textarea.form-control { 
     width: 100%; /* Or adjust the width as desired */
 }
+
+/* style.css */
+.navbar {
+    background-color: #cacaca;  /* Slightly lighter shade of dark */
+    margin-top: 30px; /* Adjust the value as needed */
+    /*border-right: 1px solid #ddd; /* Light border style */ 
+    margin-left: -60px;
+}
+
+.navbar-nav .nav-link {
+    color: #ffffff; /* White link text */
+}
+
+.navbar-nav .nav-link.active {
+    font-weight: bold;
+}
