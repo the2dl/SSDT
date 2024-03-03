@@ -2,7 +2,9 @@
  Stupid Simple Detection Testing
 
 ## Description
-This tool is an extremely basic implementation of running commands on endpoints to help trigger your command line based detections.
+This tool is an extremely basic implementation of running commands on endpoints to help trigger your command line based detections and storing them in a database to see what was run and make sure it's not failing.
+
+It also allows for historical views, and simple deletion capabilities to clear out your test queues.
 
 ## Installation
 Signup for the free tier of Supabase at https://supabase.com/database
