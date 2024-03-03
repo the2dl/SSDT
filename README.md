@@ -47,3 +47,5 @@ Landing Page
 ![Main](/screenshot/main.png?raw=true "Main")
 Historical Page
 ![History](/screenshot/history.png?raw=true "History")
+Historical Details
+![Historical Details](/screenshot/historical_land.png?raw=true "Historical Details")
