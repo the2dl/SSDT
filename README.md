@@ -41,5 +41,7 @@ wmic os get version
 whoami
 ```
 ## Screenshots
+Landing Page
 ![Main](/screenshot/main.png?raw=true "Main")
-![History](/screenshot/main.png?raw=true "History")
+Historical Page
+![History](/screenshot/history.png?raw=true "History")
