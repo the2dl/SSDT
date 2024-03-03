@@ -9,8 +9,8 @@ import platform
 app = Flask(__name__)
 
 # Supabase client initialization
-url = "SETYOURURL"
-key = "SETYOURKEY"
+url = "REMOVED"
+key = "REMOVED"
 supabase: Client = create_client(url, key)
 
 def run_commands_and_store_in_supabase(commands):
@@ -112,6 +112,23 @@ def delete_group(group_id):
     # Delete from Supabase
     supabase.table('command_outputs').delete().eq('group_id', group_id).execute() 
     return redirect('/history') 
+
+@app.route('/workbench')
+def workbench():
+    stored_commands = supabase.table('stored_commands').select('*').execute().data
+    return render_template('workbench.html', stored_commands=stored_commands)
+
+@app.route('/add_command', methods=['POST']) 
+def add_command():
+    commands = request.form['commands']  # Get commands as a single string
+    # Insert the command into the stored_commands table
+    supabase.table('stored_commands').insert({"commands": commands, "created_at": datetime.utcnow().isoformat()}).execute()
+    return redirect('/workbench') 
+
+@app.route('/delete_command/<command_id>', methods=['POST']) 
+def delete_command(command_id):
+    supabase.table('stored_commands').delete().eq('id', command_id).execute()
+    return redirect('/workbench')
 
 if __name__ == '__main__':
     app.run(debug=True)

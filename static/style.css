@@ -27,3 +27,39 @@ textarea.form-control {
 .navbar-nav .nav-link.active {
     font-weight: bold;
 }
+
+
+/* Ensure list items allow content to wrap */
+.list-group-item {
+    word-wrap: break-word; /* Old browsers */
+    overflow-wrap: break-word; /* CSS3 */
+}
+
+/* Style for command spans, if needed for further control */
+.list-group-item .badge.bg-dark {
+    display: inline-block; /* Allows the element to wrap like inline but apply block model properties */
+    max-width: 100%; /* Ensures it doesn't overflow its container */
+    margin-bottom: 2px; /* Optional: Adds a little space between wrapped commands */
+    white-space: normal; /* Ensures that whitespace inside the span is handled normally */
+}
+
+.table td, .table th {
+    word-wrap: break-word; /* Allow long words to be able to break and wrap to the next line */
+    max-width: 150px; /* Set a maximum width for each cell. You can adjust this value based on your needs */
+}
+
+/* This is optional, for better table readability */
+.table th {
+    position: sticky; /* Makes the table header sticky */
+    top: 0; /* Stick to the top of the table */
+    background-color: #000; /* Match your theme's header background color */
+    z-index: 2; /* Ensures the header is above other content */
+}
+
+#loadingIcon {
+    position: fixed; /* Make it fixed for viewport-level centering */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center both horizontally and vertically */
+    z-index: 1000; /* Ensure it's on top of other content */
+}
