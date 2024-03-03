@@ -40,3 +40,5 @@ nltest /dclist:
 wmic os get version
 whoami
 ```
+## Screenshots
+![Main](/screenshot/main.png?raw=true "Main")
