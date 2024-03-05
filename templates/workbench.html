@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+    <title>SSDT - Stupid Simple Detection Testing</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-dark text-white">
+    <div class="container"> 
+        <div class="row">
+            <div class="col-md-2"> 
+                <nav class="navbar bg-dark navbar-dark navbar-expand-md"> 
+                    <ul class="navbar-nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link bi bi-house" href="/"> Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link bi bi-clock-history" href="/history"> History</a> 
+                        </li>
+                        <!-- Add Workbench to the navigation -->
+                        <li class="nav-item">
+                            <a class="nav-link active bi bi-tools" href="/workbench"> Workbench</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div> 
+            <div class="col-md-10"> 
+                <div class="container"> <br />
+                    <h1>Workbench</h1>
+                    <div class="mb-3"> 
+                        <form action="/add_command" method="post" class="mb-2">
+                            <label for="commands" class="form-label">Enter and store your favorite commands to copy and re-use later</label>
+                            <div class="input-group">
+                                <textarea name="commands" id="commands" class="form-control" rows="3" placeholder="Enter commands here, separated by a comma."></textarea>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- List of saved commands -->
+                    <div class="mb-3">
+                        <h2>Saved Commands</h2>
+                        <ul class="list-group">
+                            {% for command in stored_commands %}
+                                <li class="list-group-item bg-secondary">
+                                    {% set command_list = command.commands.split(',') %}
+                                    {% for cmd in command_list %}
+                                        <span class="badge bg-dark">{{ cmd }}</span>
+                                    {% endfor %}
+                                    <!-- Button or link to delete the command -->
+                                    <form action="/delete_command/{{ command.id }}" method="post" class="d-inline float-end">
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>                                   
+                                </li>
+                            {% else %}
+                                <li class="list-group-item bg-secondary">No commands saved.</li>
+                            {% endfor %}
+                        </ul> <br />
+                        <div class="mb-3">
+                            <button id="copyButton" class="btn btn-primary">Copy</button>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    document.getElementById('copyButton').addEventListener('click', function() {
+        let commands = [];
+        // Assuming each command is within a span with class 'command-text'
+        // If you haven't wrapped commands in a span, adjust the selector to target the correct elements
+        document.querySelectorAll('.list-group-item.bg-secondary .badge.bg-dark').forEach(function(cmdSpan) {
+            commands.push(cmdSpan.textContent.trim()); // Collect text content of each command
+        });
+        
+        // Join all commands with a newline character for better formatting
+        let commandsToCopy = commands.join('\n');
+        
+        // Use the Clipboard API to copy the commands string
+        navigator.clipboard.writeText(commandsToCopy).then(function() {
+            console.log('Copying to clipboard was successful!');
+            // Optional: Provide user feedback that text was copied
+            alert('Commands copied to clipboard!');
+        }, function(err) {
+            console.error('Could not copy text: ', err);
+        });
+    });
+    </script>
+    
+    
+</html>

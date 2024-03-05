@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+    <title>SSDT - {{ group_data[0].group_id }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-dark text-white">
+    <div class="container"> 
+        <div class="row">
+            <div class="col-md-2"> 
+                <nav class="navbar bg-dark navbar-dark navbar-expand-md"> 
+                    <ul class="navbar-nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link bi bi-house" href="/"> Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active bi bi-clock-history" href="/history"> History</a> 
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link bi bi-tools" href="/workbench"> Workbench</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div> 
+            <div class="col-md-9"> 
+                <div class="container"> <br />
+                    <h1>Group ID: {{ group_data[0].group_id }}</h1> 
+                    <table class="table table-striped table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>Timestamp (UTC)</th>
+                                <th>Command</th>
+                                <th>Output/Error</th>
+                                <th>OS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in group_data %}
+                            <tr>
+                                <td>{{ record.timestamp }}</td>
+                                <td>{{ record.command }}</td>
+                                <td>{{ record.output if record.output else record.error }}</td>
+                                <td>{{ record.operating_system }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

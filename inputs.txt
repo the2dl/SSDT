@@ -1,3 +1,0 @@
-whoami
-uname -a
-pwd

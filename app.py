@@ -1,96 +1,134 @@
 import time
-import json
 import subprocess
-import os
-import platform
-import uuid  # Added for generating unique identifiers
+import uuid
 from datetime import datetime
 from flask import Flask, render_template, request, redirect
-from werkzeug.utils import secure_filename 
+from supabase import create_client, Client
+import platform
 
 app = Flask(__name__)
 
-output_file_path = r"/Users/dan/detection_testing/out.json"
+# Supabase client initialization
+url = "REMOVED"
+key = "REMOVED"
+supabase: Client = create_client(url, key)
 
-def run_commands_from_commands_list(commands):
-    output_data = []
+def run_commands_and_store_in_supabase(commands):
     unique_id = str(uuid.uuid4())  # Generate a unique identifier for the group of commands
-
+    operating_system = platform.system() # Collect the OS name
+    
     for command in commands:
         if command.strip():
+            start_time = datetime.utcnow()
             try:
-                start_time = datetime.utcnow()
                 result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-
                 output_record = {
                     "timestamp": start_time.isoformat(),
                     "command": command,
                     "output": result.stdout if result.stdout else result.stderr,
-                    "group_id": unique_id  # Associate the unique identifier with the command
+                    "group_id": unique_id,
+                    "error": "",
+                    "operating_system": operating_system
                 }
-                output_data.append(output_record)
-
             except subprocess.CalledProcessError as e:
                 output_record = {
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": start_time.isoformat(),
                     "command": command,
+                    "output": "",
+                    "group_id": unique_id,
                     "error": str(e),
-                    "group_id": unique_id  # Associate the unique identifier with the command
+                    "operating_system": operating_system
                 }
-                output_data.append(output_record)
+            # Insert command output into Supabase
+            supabase.table("command_outputs").insert(output_record).execute()
 
             time.sleep(1)
 
-    # Append new commands to the existing file instead of overwriting
-    try:
-        with open(output_file_path, "r") as output_file:
-            existing_data = json.load(output_file)
-            existing_data.extend(output_data)
-    except FileNotFoundError:
-        existing_data = output_data
+def get_latest_group_id():
+    # Fetch all records with their timestamps
+    result = supabase.table('command_outputs').select('group_id, timestamp').execute()
 
-    with open(output_file_path, "w") as output_file:
-        json.dump(existing_data, output_file, indent=2)
+    if result.data:
+        # Sort the records by timestamp in descending order to get the latest
+        sorted_data = sorted(result.data, key=lambda x: x['timestamp'], reverse=True)
+        # Return the group_id of the first record, which is the latest
+        return sorted_data[0].get('group_id')
+    else:
+        return None
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    operating_system = platform.system()  # Get OS info
-
     if request.method == 'POST':
         commands = request.form['commands'].splitlines()
-        with open('inputs.txt', 'w') as f:
-            f.writelines(command + '\n' for command in commands)
-        run_commands_from_commands_list(commands)
-        return redirect('/')  
+        run_commands_and_store_in_supabase(commands)
+        return redirect('/')
 
-    # Read output from file and group by 'group_id'
-    try:
-        with open(output_file_path, 'r') as f:
-            output_data = json.load(f) 
+    latest_group_id = get_latest_group_id()
+    if latest_group_id:
+        # Fetch command outputs from Supabase for the latest group
+        data = supabase.table("command_outputs").select("*").eq('group_id', latest_group_id).execute().data
+        table_data = [data]
+    else:
+        table_data = []
 
-            grouped_data = {}
-            for record in output_data:
-                group_id = record.get('group_id')
-                if group_id in grouped_data:
-                    grouped_data[group_id].append(record)
-                else:
-                    grouped_data[group_id] = [record]
-
-            # Convert grouped_data to a list of lists for easier template rendering
-            # You'll need to adjust the template to handle this structure
-            table_data = [[record for record in records] for group_id, records in grouped_data.items()]
-
-            return render_template('index.html', table_data=table_data, operating_system=operating_system)
-    except FileNotFoundError:
-        return render_template('index.html', operating_system=operating_system) # Still display the OS
+    return render_template('index.html', table_data=table_data)
 
 @app.route('/delete_output', methods=['POST'])
 def delete_output():
-    try:
-        os.remove(output_file_path)
-    except FileNotFoundError:
-        pass  # Ignore if the file doesn't exist
-    return redirect('/') 
+    group_id = request.args.get('group_id')  # Get the group_id from query parameters
+    if group_id:
+        # Delete entries from the command_outputs table with the matching group_id
+        supabase.table("command_outputs").delete().eq('group_id', group_id).execute()
+    return redirect('/')
+
+@app.route('/history', methods=['GET'])
+def history():
+    # Retrieve all group_id values from the Supabase table
+    result = supabase.table('command_outputs').select('group_id').execute()
+
+    if result.data:
+        # Extract the group_id values and use a set to ensure uniqueness
+        historical_group_ids = list(set([row['group_id'] for row in result.data]))
+    else:
+        # If no data is found, return an empty list
+        historical_group_ids = []
+
+    # Render the history.html template, passing the unique group_ids
+    return render_template('history.html', group_ids=historical_group_ids)
+
+@app.route('/view_group/<group_id>')
+def view_group(group_id):
+    # Fetch command outputs with matching group_id from Supabase
+    data = supabase.table("command_outputs").select("*").eq('group_id', group_id).execute().data
+
+    if not data:
+        # Handle the case where no data is found for the group_id
+        return render_template('error.html', error_message="Group not found"), 404
+
+    return render_template('view_group.html', group_data=data)
+
+@app.route('/delete_group/<group_id>', methods=['POST'])
+def delete_group(group_id):
+    # Delete from Supabase
+    supabase.table('command_outputs').delete().eq('group_id', group_id).execute() 
+    return redirect('/history') 
+
+@app.route('/workbench')
+def workbench():
+    stored_commands = supabase.table('stored_commands').select('*').execute().data
+    return render_template('workbench.html', stored_commands=stored_commands)
+
+@app.route('/add_command', methods=['POST']) 
+def add_command():
+    commands = request.form['commands']  # Get commands as a single string
+    # Insert the command into the stored_commands table
+    supabase.table('stored_commands').insert({"commands": commands, "created_at": datetime.utcnow().isoformat()}).execute()
+    return redirect('/workbench') 
+
+@app.route('/delete_command/<command_id>', methods=['POST']) 
+def delete_command(command_id):
+    supabase.table('stored_commands').delete().eq('id', command_id).execute()
+    return redirect('/workbench')
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True)
