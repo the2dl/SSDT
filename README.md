@@ -11,7 +11,7 @@ This tool is operating system agnostic. As long as you have python installed it 
 ## Installation
 Signup for the free tier of Supabase at https://supabase.com/database
 
-Create a new database, then setup a new table. The table is setup as below:
+Create a new database, then setup some new tables. The first table is for command_outputs:
 
 ```
 CREATE TABLE command_outputs (
@@ -24,7 +24,19 @@ CREATE TABLE command_outputs (
   operating_system TEXT
 );
 ```
-From within the repo directory, run pip install -r requirements.txt.
+
+The second table is for stored_commands for the workbench:
+
+``` 
+CREATE TABLE stored_commands (
+  id BIGINT PRIMARY KEY,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  commands TEXT,
+  description TEXT
+);
+```
+
+From within the repo directory, run `pip install -r requirements.txt`.
 
 ### Adjust Supabase credentials in app.py
 
