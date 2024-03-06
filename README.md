@@ -22,7 +22,8 @@ CREATE TABLE command_outputs (
   output TEXT,
   group_id TEXT,
   error TEXT,
-  operating_system TEXT
+  operating_system TEXT,
+  hostname TEXT
 );
 ```
 
