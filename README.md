@@ -40,9 +40,11 @@ From within the repo directory, run `pip install -r requirements.txt`.
 
 ### Adjust Supabase credentials in app.py
 
-Lines 12 and 13
-url = "SETYOURURL"
-key = "SETYOURKEY"
+### Supabase client initialization
+```
+url = "removed"
+key = "removed"
+```
 
 ## Start Flask
 `flask run` from within the repository directory, connect to it on http://127.0.0.1:5000
