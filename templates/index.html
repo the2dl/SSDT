@@ -39,7 +39,7 @@
                             <div class="input-group">
                                 <textarea name="commands" class="form-control" rows="3"></textarea>
                                 <button type="submit" class="btn btn-primary" id="submitButton">Run</button> <!-- Added id="submitButton" here -->
-                            </div>
+                            </div> <br />
                             <div class="mb-3">
                                 <label for="timeout" class="form-label">Command Timeout (seconds):</label>
                                 <input type="number" name="timeout" id="timeout" class="form-control" value="30" min="1">
@@ -60,6 +60,7 @@
                                         <th>Command</th>
                                         <th>Output/Error</th>
                                         <th>OS</th>
+                                        <th>host</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -69,6 +70,7 @@
                                         <td>{{ record.command }}</td>
                                         <td>{{ record.output if record.output else record.error }}</td>
                                         <td>{{ record.operating_system }}</td>
+                                        <td>{{ record.hostname }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

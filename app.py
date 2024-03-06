@@ -20,15 +20,19 @@ from flask import Flask, render_template, request, redirect
 from supabase import create_client, Client
 import platform
 import threading
+import socket
 
 app = Flask(__name__)
 
 # Supabase client initialization
-url = "removed"
-key = "removed"
+url = "replace"
+key = "replace"
 supabase: Client = create_client(url, key)
 
-def execute_command_with_timeout(command, timeout, unique_id, start_time, operating_system, on_timeout_callback):
+def get_hostname():
+    return socket.gethostname()
+
+def execute_command_with_timeout(command, timeout, unique_id, start_time, operating_system, hostname, on_timeout_callback):
     try:
         # Execute the command with a timeout
         result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True, timeout=timeout)
@@ -38,7 +42,8 @@ def execute_command_with_timeout(command, timeout, unique_id, start_time, operat
             "output": result.stdout if result.stdout else result.stderr,
             "group_id": unique_id,
             "error": "",
-            "operating_system": operating_system
+            "operating_system": operating_system,
+            "hostname": hostname  # Add hostname here
         }
     except subprocess.CalledProcessError as e:
         output_record = {
@@ -47,7 +52,8 @@ def execute_command_with_timeout(command, timeout, unique_id, start_time, operat
             "output": "",
             "group_id": unique_id,
             "error": str(e),
-            "operating_system": operating_system
+            "operating_system": operating_system,
+            "hostname": hostname  # Add hostname here
         }
     except subprocess.TimeoutExpired:
         output_record = {
@@ -56,7 +62,8 @@ def execute_command_with_timeout(command, timeout, unique_id, start_time, operat
             "output": "failed",
             "group_id": unique_id,
             "error": "Command timed out after 30 seconds",
-            "operating_system": operating_system
+            "operating_system": operating_system,
+            "hostname": hostname  # Add hostname here
         }
     else:
         # If no exception was raised, insert the successful command output into Supabase
@@ -82,12 +89,14 @@ def on_command_timeout(command, unique_id, start_time, operating_system):
 def run_commands_and_store_in_supabase(commands, timeout):
     unique_id = str(uuid.uuid4())  # Generate a unique identifier for the group of commands
     operating_system = platform.system()  # Collect the OS name
+    hostname = get_hostname()  # Collect the hostname
     
     for command in commands:
         if command.strip():
             start_time = datetime.utcnow()
             # Adjust here to use the user-specified timeout
-            thread = threading.Thread(target=execute_command_with_timeout, args=(command, timeout, unique_id, start_time, operating_system, lambda: on_command_timeout(command, unique_id, start_time, operating_system)))
+            thread = threading.Thread(target=execute_command_with_timeout, 
+            args=(command, timeout, unique_id, start_time, operating_system, hostname, lambda: on_command_timeout(command, unique_id, start_time, operating_system)))
             thread.start()
             # Adjust the join timeout to respect the user-defined timeout plus a buffer
             thread.join(timeout=timeout + 5)  # Use the user-specified timeout plus a buffer
