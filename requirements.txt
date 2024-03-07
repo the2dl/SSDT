@@ -1,7 +1,2 @@
-flask
+Flask
 supabase-py
-python-dateutil
-uuid
-time
-subprocess
-platform
