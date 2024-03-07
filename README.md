@@ -42,7 +42,8 @@ From within the repo directory, run `pip install -r requirements.txt`.
 
 ### Adjust Supabase credentials in app.py
 
-Supabase client initialization
+Supabase client initialization (these can be found in Project Settings > API). Verify permissions of your account you use, for simplicity since this is all local to your own instance, you can select the service_role secret, but you can also define proper roles if you'd like.
+
 ```
 url = "removed"
 key = "removed"
