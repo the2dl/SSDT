@@ -42,7 +42,7 @@ From within the repo directory, run `pip install -r requirements.txt`.
 
 ### Adjust Supabase credentials in app.py
 
-### Supabase client initialization
+Supabase client initialization
 ```
 url = "removed"
 key = "removed"
@@ -51,6 +51,16 @@ key = "removed"
 ## Start Flask
 `flask run` from within the repository directory, connect to it on http://127.0.0.1:5000
 
+## Self contained executable
+
+Sometimes you don't want to install Python on every endpoint, not a problem! Utilize pyinstaller to build a version for your underlying OS.
+
+From within the flask app directory:
+
+`pyinstaller.exe -w -F --add-data "templates;templates" --add-data "static;static" app.py`
+
+The above when run on whatever operating system you're on will build an app binary (app/app.exe/etc) in the .\dist directory. Simply run this compiled payload and connect to it on http://127.0.0.1:5000.
+
 ## Run
 Within the app, you can add a list of commands you want to run, one per new line, for example
 ```
@@ -58,6 +68,10 @@ nltest /dclist:
 wmic os get version
 whoami
 ```
+
+## Ideas
+I may create agent workers for this over time, it's a lot more work but something I may build out as it'd eliminate the need to deploy the webserver on each endpoint. Feel free to make a pull request!
+
 ## Screenshots
 Landing Page
 ![Main](/screenshot/main.png?raw=true "Main")

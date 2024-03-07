@@ -63,3 +63,11 @@ textarea.form-control {
     transform: translate(-50%, -50%); /* Center both horizontally and vertically */
     z-index: 1000; /* Ensure it's on top of other content */
 }
+
+#logo-container img {
+    float: right;
+    margin-top: 30px;
+    margin-right: -140px;
+    width: 50px; 
+    height: 26px; 
+}
