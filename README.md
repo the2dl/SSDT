@@ -78,6 +78,6 @@ Landing Page
 Workbench
 ![Workbench](/screenshot/workbench.png?raw=true "Work Bench")
 Historical Page
-![History](/screenshot/historical_results?raw=true "History")
+![History](/screenshot/historical_results.png?raw=true "History")
 Historical Details
 ![Historical Details](/screenshot/view_historical.png?raw=true "Historical Details")
