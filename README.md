@@ -75,7 +75,9 @@ I may create agent workers for this over time, it's a lot more work but somethin
 ## Screenshots
 Landing Page
 ![Main](/screenshot/main.png?raw=true "Main")
+Workbench
+![Workbench](/screenshot/workbench.png?raw=true "Work Bench")
 Historical Page
-![History](/screenshot/history.png?raw=true "History")
+![History](/screenshot/historical_results?raw=true "History")
 Historical Details
-![Historical Details](/screenshot/historical_land.png?raw=true "Historical Details")
+![Historical Details](/screenshot/view_historical.png?raw=true "Historical Details")
