@@ -56,7 +56,7 @@ key = "removed"
 
 Sometimes you don't want to install Python on every endpoint, not a problem! Utilize pyinstaller to build a version for your underlying OS.
 
-From within the flask app directory:
+From within the flask app directory (change this to pyinstaller without .exe if you're on a Linux based system):
 
 `pyinstaller.exe -w -F --add-data "templates;templates" --add-data "static;static" app.py`
 
