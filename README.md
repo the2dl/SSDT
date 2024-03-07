@@ -42,7 +42,8 @@ From within the repo directory, run `pip install -r requirements.txt`.
 
 ### Adjust Supabase credentials in app.py
 
-Supabase client initialization
+Supabase client initialization (these can be found in Project Settings > API). Verify permissions of your account you use, for simplicity since this is all local to your own instance, you can select the service_role secret, but you can also define proper roles if you'd like.
+
 ```
 url = "removed"
 key = "removed"
@@ -55,7 +56,7 @@ key = "removed"
 
 Sometimes you don't want to install Python on every endpoint, not a problem! Utilize pyinstaller to build a version for your underlying OS.
 
-From within the flask app directory:
+From within the flask app directory (change this to pyinstaller without .exe if you're on a Linux based system):
 
 `pyinstaller.exe -w -F --add-data "templates;templates" --add-data "static;static" app.py`
 
@@ -75,7 +76,9 @@ I may create agent workers for this over time, it's a lot more work but somethin
 ## Screenshots
 Landing Page
 ![Main](/screenshot/main.png?raw=true "Main")
+Workbench
+![Workbench](/screenshot/workbench.png?raw=true "Work Bench")
 Historical Page
-![History](/screenshot/history.png?raw=true "History")
+![History](/screenshot/historical_results.png?raw=true "History")
 Historical Details
-![Historical Details](/screenshot/historical_land.png?raw=true "Historical Details")
+![Historical Details](/screenshot/view_historical.png?raw=true "Historical Details")
