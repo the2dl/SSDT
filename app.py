@@ -1,3 +1,17 @@
+# SSDT - Super Simple Detection Testing
+# Dan Lussier - @dansec_ / the2dl
+
+'''
+     _               _     _       _                 _            _      _            _   _               _            _   _             
+    | |             (_)   | |     (_)               | |          | |    | |          | | (_)             | |          | | (_)            
+ ___| |_ _   _ _ __  _  __| |  ___ _ _ __ ___  _ __ | | ___    __| | ___| |_ ___  ___| |_ _  ___  _ __   | |_ ___  ___| |_ _ _ __   __ _ 
+/ __| __| | | | '_ \| |/ _` | / __| | '_ ` _ \| '_ \| |/ _ \  / _` |/ _ \ __/ _ \/ __| __| |/ _ \| '_ \  | __/ _ \/ __| __| | '_ \ / _` |
+\__ \ |_| |_| | |_) | | (_| | \__ \ | | | | | | |_) | |  __/ | (_| |  __/ ||  __/ (__| |_| | (_) | | | | | ||  __/\__ \ |_| | | | | (_| |
+|___/\__|\__,_| .__/|_|\__,_| |___/_|_| |_| |_| .__/|_|\___|  \__,_|\___|\__\___|\___|\__|_|\___/|_| |_|  \__\___||___/\__|_|_| |_|\__, |
+              | |                             | |                                                                                   __/ |
+              |_|                             |_|                                                                                  |___/ 
+'''
+
 import time
 import subprocess
 import uuid
@@ -5,44 +19,94 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect
 from supabase import create_client, Client
 import platform
+import threading
+import socket
 
 app = Flask(__name__)
 
 # Supabase client initialization
-url = "REMOVED"
-key = "REMOVED"
+url = "replace"
+key = "replace"
 supabase: Client = create_client(url, key)
 
-def run_commands_and_store_in_supabase(commands):
+def get_hostname():
+    return socket.gethostname()
+
+def execute_command_with_timeout(command, timeout, unique_id, start_time, operating_system, hostname, on_timeout_callback):
+    try:
+        # Execute the command with a timeout
+        result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True, timeout=timeout)
+        output_record = {
+            "timestamp": start_time.isoformat(),
+            "command": command,
+            "output": result.stdout if result.stdout else result.stderr,
+            "group_id": unique_id,
+            "error": "",
+            "operating_system": operating_system,
+            "hostname": hostname  # Add hostname here
+        }
+    except subprocess.CalledProcessError as e:
+        output_record = {
+            "timestamp": start_time.isoformat(),
+            "command": command,
+            "output": "",
+            "group_id": unique_id,
+            "error": str(e),
+            "operating_system": operating_system,
+            "hostname": hostname  # Add hostname here
+        }
+    except subprocess.TimeoutExpired:
+        output_record = {
+            "timestamp": start_time.isoformat(),
+            "command": command,
+            "output": "failed",
+            "group_id": unique_id,
+            "error": "Command timed out after 30 seconds",
+            "operating_system": operating_system,
+            "hostname": hostname  # Add hostname here
+        }
+    else:
+        # If no exception was raised, insert the successful command output into Supabase
+        supabase.table("command_outputs").insert(output_record).execute()
+        return  # Early return to avoid executing the on_timeout_callback
+
+    # Handle both CalledProcessError and TimeoutExpired by inserting the output record
+    supabase.table("command_outputs").insert(output_record).execute()
+
+def on_command_timeout(command, unique_id, start_time, operating_system):
+    # This function will be called when the command exceeds its execution timeout
+    output_record = {
+        "timestamp": start_time.isoformat(),
+        "command": command,
+        "output": "failed",
+        "group_id": unique_id,
+        "error": "Command forcefully terminated after exceeding timeout",
+        "operating_system": operating_system
+    }
+    # Insert the failure record into Supabase
+    supabase.table("command_outputs").insert(output_record).execute()
+
+def run_commands_and_store_in_supabase(commands, timeout):
     unique_id = str(uuid.uuid4())  # Generate a unique identifier for the group of commands
-    operating_system = platform.system() # Collect the OS name
+    operating_system = platform.system()  # Collect the OS name
+    hostname = get_hostname()  # Collect the hostname
     
     for command in commands:
         if command.strip():
             start_time = datetime.utcnow()
-            try:
-                result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-                output_record = {
-                    "timestamp": start_time.isoformat(),
-                    "command": command,
-                    "output": result.stdout if result.stdout else result.stderr,
-                    "group_id": unique_id,
-                    "error": "",
-                    "operating_system": operating_system
-                }
-            except subprocess.CalledProcessError as e:
-                output_record = {
-                    "timestamp": start_time.isoformat(),
-                    "command": command,
-                    "output": "",
-                    "group_id": unique_id,
-                    "error": str(e),
-                    "operating_system": operating_system
-                }
-            # Insert command output into Supabase
-            supabase.table("command_outputs").insert(output_record).execute()
+            # Adjust here to use the user-specified timeout
+            thread = threading.Thread(target=execute_command_with_timeout, 
+            args=(command, timeout, unique_id, start_time, operating_system, hostname, lambda: on_command_timeout(command, unique_id, start_time, operating_system)))
+            thread.start()
+            # Adjust the join timeout to respect the user-defined timeout plus a buffer
+            thread.join(timeout=timeout + 5)  # Use the user-specified timeout plus a buffer
+            
+            if thread.is_alive():
+                # If the thread is still alive, it means the command exceeded the timeout
+                # Explicitly call the timeout handler function to insert a failure record
+                on_command_timeout(command, unique_id, start_time, operating_system)
 
-            time.sleep(1)
+            time.sleep(1)  # Throttle command execution
 
 def get_latest_group_id():
     # Fetch all records with their timestamps
@@ -60,7 +124,8 @@ def get_latest_group_id():
 def index():
     if request.method == 'POST':
         commands = request.form['commands'].splitlines()
-        run_commands_and_store_in_supabase(commands)
+        timeout = int(request.form.get('timeout', 30))  # Get the timeout from the form, default to 30 seconds
+        run_commands_and_store_in_supabase(commands, timeout)  # Pass the timeout to your function
         return redirect('/')
 
     latest_group_id = get_latest_group_id()

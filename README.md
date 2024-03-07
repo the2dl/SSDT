@@ -1,5 +1,6 @@
 # SSDT
- Stupid Simple Detection Testing
+
+Stupid Simple Detection Testing - For when you just need to quickly validate some rules.
 
 ## Description
 This tool is an extremely basic implementation of running commands on endpoints to help trigger your command line based detections and storing them in a database to see what was run and make sure it's not failing.
@@ -11,7 +12,7 @@ This tool is operating system agnostic. As long as you have python installed it 
 ## Installation
 Signup for the free tier of Supabase at https://supabase.com/database
 
-Create a new database, then setup a new table. The table is setup as below:
+Create a new database, then setup some new tables. The first table is for command_outputs:
 
 ```
 CREATE TABLE command_outputs (
@@ -21,16 +22,31 @@ CREATE TABLE command_outputs (
   output TEXT,
   group_id TEXT,
   error TEXT,
-  operating_system TEXT
+  operating_system TEXT,
+  hostname TEXT
 );
 ```
-From within the repo directory, run pip install -r requirements.txt.
+
+The second table is for stored_commands for the workbench:
+
+``` 
+CREATE TABLE stored_commands (
+  id BIGINT PRIMARY KEY,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  commands TEXT,
+  description TEXT
+);
+```
+
+From within the repo directory, run `pip install -r requirements.txt`.
 
 ### Adjust Supabase credentials in app.py
 
-Lines 12 and 13
-url = "SETYOURURL"
-key = "SETYOURKEY"
+### Supabase client initialization
+```
+url = "removed"
+key = "removed"
+```
 
 ## Start Flask
 `flask run` from within the repository directory, connect to it on http://127.0.0.1:5000
